@@ -5,8 +5,6 @@ pub async fn fetch(endpoint: &str) -> Result<Value, reqwest::Error> {
     let rancher_url = env::var("RANCHER_URL").expect("Error: VAR_NAME not found");
     let bearer_token = env::var("RANCHER_TOKEN").expect("Error: VAR_NAME not found");
 
-    print!("{}{}", rancher_url, bearer_token);
-
     let url = format!("{}{}", rancher_url, endpoint);
 
     let response = reqwest::Client::new()
@@ -18,6 +16,7 @@ pub async fn fetch(endpoint: &str) -> Result<Value, reqwest::Error> {
         .await?;
 
     let parsed_json = parse_json(&response).unwrap();
+
     // Return the clusters as parsed json
     Ok(parsed_json)
 }
