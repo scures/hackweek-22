@@ -1,0 +1,4 @@
+Deployment:
+  ☐ Create a Dockerfile for the application
+  ☐ Publish the Dockerfile to a public repository
+  ☐ Create the Kubernetes deployment manifest
