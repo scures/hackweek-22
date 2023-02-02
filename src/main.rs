@@ -48,7 +48,7 @@ async fn main() {
     // Store the cluster ids in a vector
     let ids = get_ids().await.unwrap();
 
-    let mut overall = Vec::new();
+    let mut monit_data = Vec::new();
 
     // Iterate over the cluster ids and get the metrics for each cluster
     for id in ids {
@@ -58,11 +58,9 @@ async fn main() {
                 .await
                 .unwrap();
 
-        let mut v = Vec::new();
+        let mut nodes_vector = Vec::new();
 
         for cluster_nodes in &get_cluster_nodes["data"].as_array() {
-            // println!("metric {:?}", cluster_nodes);
-
             for node in cluster_nodes.iter() {
                 let node_name = node.get("id").unwrap().to_string();
                 let x = node
@@ -72,29 +70,26 @@ async fn main() {
                     .to_string();
 
                 let metrics = utils::extract_data(&x);
-                // println!("🦀 ID: {}, Metrics: {:?}", node_name, node);
 
-                // TODO: Set a node with a status NOT-READY if the metric response is empty
-                v.push(Node {
+                // Store the node name and metrics into a new Node struct
+                nodes_vector.push(Node {
                     name: node_name,
                     usage: metrics,
                 });
             }
         }
 
-        // For each cluster, store a new ClusterMetrics struct into the overall vec
-        overall.push(ClusterMetrics {
+        // For each cluster, store a new ClusterMetrics struct into the monit_data vec
+        monit_data.push(ClusterMetrics {
             id: id.to_string(),
-            nodes: v,
-        });
-
-        // println!("{:?}", &v);
+            nodes: nodes_vector,
+        })
     }
 
-    // convert the overall vec to json
-    let json = serde_json::to_string(&overall).unwrap();
+    // Convert the monit_data vec to json
+    let json = serde_json::to_string(&monit_data).unwrap();
 
-    println!("{:?}", json)
+    println!("🦀 {:?}", json)
 
     // TODO: Send the overall vec to Rancher as CRD
 }

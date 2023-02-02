@@ -1,15 +1,10 @@
-# Use a minimal Alpine Linux image as the base
-FROM alpine:latest
+FROM rust:1.67.0
 
-# Set the working directory
-WORKDIR /app
+# 2. Copy the files in your machine to the Docker image
+COPY ./ ./
 
-# Copy the Rust application into the image
-COPY . .
+# Build your program for release
+RUN cargo build --release
 
-# Build the Rust application
-RUN apk add --no-cache rust && \
-    cargo build --release
-
-# Set the command to run when the container starts
-CMD ["./target/release/hackweek-22"]
+# Run the binary
+CMD ["./target/release/hackweek"]

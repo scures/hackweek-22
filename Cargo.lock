@@ -167,7 +167,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hackweek-22"
+name = "hackweek"
 version = "0.1.0"
 dependencies = [
  "reqwest",
