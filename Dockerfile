@@ -1,8 +1,15 @@
-FROM rust:1.61.0
+# Use a minimal Alpine Linux image as the base
+FROM alpine:latest
 
-WORKDIR /usr/src/myapp
+# Set the working directory
+WORKDIR /app
+
+# Copy the Rust application into the image
 COPY . .
 
-RUN cargo install --path .
+# Build the Rust application
+RUN apk add --no-cache rust && \
+    cargo build --release
 
-CMD ["myapp"]
+# Set the command to run when the container starts
+CMD ["./target/release/hackweek-22"]

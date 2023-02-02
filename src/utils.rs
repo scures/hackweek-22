@@ -17,6 +17,10 @@ pub async fn fetch(endpoint: &str) -> Result<Value, reqwest::Error> {
         .text()
         .await?;
 
+    if response == "EOF" {
+        return Ok(().into());
+    }
+
     let parsed_json = parse_json(&response).unwrap();
 
     // Return the clusters as parsed json
@@ -25,6 +29,7 @@ pub async fn fetch(endpoint: &str) -> Result<Value, reqwest::Error> {
 
 pub fn parse_json(json_str: &str) -> ResultJSON<Value> {
     let value: Value = serde_json::from_str(json_str)?;
+
     Ok(value)
 }
 

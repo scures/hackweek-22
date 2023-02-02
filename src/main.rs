@@ -1,17 +1,23 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 mod utils;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Usage {
     cpu: String,
     memory: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Node {
     name: String,
     usage: Usage,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ClusterMetrics {
+    id: String,
+    nodes: Vec<Node>,
 }
 
 #[tokio::main]
@@ -34,7 +40,7 @@ async fn main() {
             }
         }
 
-        println!("{:?}", ids);
+        println!("Clusters List: {:?}", ids);
 
         Ok(ids)
     }
@@ -42,34 +48,53 @@ async fn main() {
     // Store the cluster ids in a vector
     let ids = get_ids().await.unwrap();
 
-    let mut overall: Vec<Node> = Vec::new();
+    let mut overall = Vec::new();
 
     // Iterate over the cluster ids and get the metrics for each cluster
     for id in ids {
-        // Get the metrics for each cluster id
-        let get_metrics = utils::fetch(&format!("/k8s/clusters/{}/v1/metrics.k8s.io.nodes", id))
-            .await
-            .unwrap();
+        // Get the nods from cluster
+        let get_cluster_nodes =
+            utils::fetch(&format!("/k8s/clusters/{}/v1/metrics.k8s.io.nodes", id))
+                .await
+                .unwrap();
 
-        for _metric in &get_metrics["data"].as_array() {
-            let x = _metric[0]
-                .get("usage")
-                .map(|usage| usage.clone())
-                .unwrap()
-                .to_string();
+        let mut v = Vec::new();
 
-            let metrics = utils::extract_data(&x);
-            println!("ID: {}, Metrics: {:?}", id, metrics);
+        for cluster_nodes in &get_cluster_nodes["data"].as_array() {
+            // println!("metric {:?}", cluster_nodes);
 
-            overall.push(Node {
-                name: id.to_string(),
-                usage: metrics,
-            });
+            for node in cluster_nodes.iter() {
+                let node_name = node.get("id").unwrap().to_string();
+                let x = node
+                    .get("usage")
+                    .map(|usage| usage.clone())
+                    .unwrap()
+                    .to_string();
+
+                let metrics = utils::extract_data(&x);
+                // println!("🦀 ID: {}, Metrics: {:?}", node_name, node);
+
+                // TODO: Set a node with a status NOT-READY if the metric response is empty
+                v.push(Node {
+                    name: node_name,
+                    usage: metrics,
+                });
+            }
         }
+
+        // For each cluster, store a new ClusterMetrics struct into the overall vec
+        overall.push(ClusterMetrics {
+            id: id.to_string(),
+            nodes: v,
+        });
+
+        // println!("{:?}", &v);
     }
 
-    // Print overall vec of nodes
-    println!("{:?}", overall);
+    // convert the overall vec to json
+    let json = serde_json::to_string(&overall).unwrap();
+
+    println!("{:?}", json)
 
     // TODO: Send the overall vec to Rancher as CRD
 }
