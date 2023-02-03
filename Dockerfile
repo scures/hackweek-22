@@ -25,5 +25,3 @@ RUN cargo install --path .
 FROM alpine:latest
 
 COPY --from=cargo-build /usr/local/cargo/bin/hackweek /usr/local/bin/hackweek
-
-CMD ["hackweek"]
