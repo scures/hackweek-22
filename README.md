@@ -8,17 +8,34 @@ This HackWeek objectives:
   - build a simple operator (?) in Rust
 
 
+### How to run:
+You'll need a Rancher cluster to run this application. There's a GithubAction that will build & deploy the Docker Image to the registry; https://hub.docker.com/r/scures/hackweek
+
+Some environment variables are required to run the application:
+- `RANCHER_URL` - URL to the Rancher cluster
+- `RANCHER_TOKEN` - Token to access the Rancher API
+
+
+Apply the Kubernetes manifest to deploy the application:
+```bash
+kubectl apply -f k8s/deployment.yaml
+```
+
+---
 ### To improve:
-  ☐ Handle nodes status when it's not ready and we cannot fetch the metrics
-  ☐ Handle the Local cluster since metrics cannot be fetched from it
-  ✔ Group metrics nodes by cluster (?)
-  ☐ Add interval to refresh metrics
+Some things that need to be improved:
+- [ ] Handle nodes status when it's not ready and we cannot fetch the metrics
+- [ ] Handle the Local cluster since metrics cannot be fetched from it
+- [x] Group metrics nodes by cluster (?)
+- [x] Add interval to refresh metrics
 
 
 #### Deployment:
-  ☐ Create a Dockerfile for the application
-  ☐ Publish the Dockerfile to a public repository
-  ☐ Create the Kubernetes deployment manifest
+Things to do to deploy the application in a Cluster
+- [x] Create a Dockerfile tp build the application
+- [x] Publish the Docker Image to Docker Registry
+- [x] Create the Kubernetes deployment manifest
+- [ ] Create and apply CRD
 
 
 ### Resources:
