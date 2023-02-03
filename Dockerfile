@@ -1,10 +1,29 @@
-FROM rust:1.67.0
+FROM rust:latest as cargo-build
 
-# 2. Copy the files in your machine to the Docker image
-COPY ./ ./
+WORKDIR /usr/src/hackweek
 
-# Build your program for release
+COPY Cargo.toml Cargo.toml
+
+RUN mkdir src/
+
+RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
+
 RUN cargo build --release
 
-# Run the binary
-CMD ["./target/release/hackweek"]
+RUN rm -f target/release/deps/hackweek*
+
+COPY . .
+
+RUN cargo build --release
+
+RUN cargo install --path .
+
+# ------------------------------------------------------------------------------
+# Final Stage
+# ------------------------------------------------------------------------------
+
+FROM alpine:latest
+
+COPY --from=cargo-build /usr/local/cargo/bin/hackweek /usr/local/bin/hackweek
+
+CMD ["hackweek"]
