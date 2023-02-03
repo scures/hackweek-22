@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use tokio::time::interval;
 
 mod utils;
 
@@ -22,29 +23,15 @@ pub struct ClusterMetrics {
 
 #[tokio::main]
 async fn main() {
-    // Fetch the cluster ids
-    async fn get_ids() -> Result<Vec<String>, reqwest::Error> {
-        let mut ids = Vec::new();
-        let get_clusters = utils::fetch("v1/management.cattle.io.clusters").await?;
+    let mut interval = interval(std::time::Duration::from_secs(10));
 
-        if let Some(data) = get_clusters["data"].as_array() {
-            for item in data {
-                if let Some(id) = item["id"].as_str() {
-                    // Ignore the local cluster since the k8s/clusters/local/v1/metrics.k8s.io.nodes won't work (?)
-                    if id == "local" {
-                        continue;
-                    }
-
-                    ids.push(id.to_string())
-                }
-            }
-        }
-
-        println!("Clusters List: {:?}", ids);
-
-        Ok(ids)
+    loop {
+        interval.tick().await;
+        handle_requests().await;
     }
+}
 
+async fn handle_requests() {
     // Store the cluster ids in a vector
     let ids = get_ids().await.unwrap();
 
@@ -92,4 +79,27 @@ async fn main() {
     println!("🦀 {:?}", json)
 
     // TODO: Send the overall vec to Rancher as CRD
+}
+
+// Fetch the cluster ids
+async fn get_ids() -> Result<Vec<String>, reqwest::Error> {
+    let mut ids = Vec::new();
+    let get_clusters = utils::fetch("v1/management.cattle.io.clusters").await?;
+
+    if let Some(data) = get_clusters["data"].as_array() {
+        for item in data {
+            if let Some(id) = item["id"].as_str() {
+                // Ignore the local cluster since the k8s/clusters/local/v1/metrics.k8s.io.nodes won't work (?)
+                if id == "local" {
+                    continue;
+                }
+
+                ids.push(id.to_string())
+            }
+        }
+    }
+
+    println!("Clusters List: {:?}", ids);
+
+    Ok(ids)
 }
