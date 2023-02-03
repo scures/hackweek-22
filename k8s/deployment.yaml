@@ -13,6 +13,5 @@ spec:
         app: hackweek
     spec:
       containers:
-      - name: scures/hackweek
-        image: scures/hackweek
-        command: ["hackweek"]
+      - name: hackweek-rust
+        image: scures/hackweek:main

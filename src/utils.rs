@@ -4,8 +4,8 @@ use std::env;
 use crate::Usage;
 
 pub async fn fetch(endpoint: &str) -> Result<Value, reqwest::Error> {
-    let rancher_url = env::var("RANCHER_URL").expect("Error: VAR_NAME not found");
-    let bearer_token = env::var("RANCHER_TOKEN").expect("Error: VAR_NAME not found");
+    let rancher_url = env::var("RANCHER_URL").expect("Error: RANCHER_URL not found");
+    let bearer_token = env::var("RANCHER_TOKEN").expect("Error: RANCHER_TOKEN not found");
 
     let url = format!("{}{}", rancher_url, endpoint);
 

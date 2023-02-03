@@ -28,6 +28,7 @@ Some things that need to be improved:
 - [ ] Handle the Local cluster since metrics cannot be fetched from it
 - [x] Group metrics nodes by cluster (?)
 - [x] Add interval to refresh metrics
+- [ ] Fix Docker build image size
 
 
 #### Deployment:
